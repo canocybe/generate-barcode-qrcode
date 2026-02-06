@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Barcode & QRCode Generator (MIT)</title>
+  <!-- Library JsBarcode (MIT License) -->
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+  <!-- Library qrcode-generator (MIT License) -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+    input {
+      width: calc(100% - 20px);
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    }
+    .output {
+      margin-top: 20px;
+      text-align: center;
+    }
+    svg, #qrcode img {
+      margin-top: 15px;
+    }
+    .actions {
+      margin-top: 10px;
+    }
+    button {
+      margin: 5px;
+      padding: 8px 12px;
+      background: #0078d7;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #005a9e;
+    }
+    .license {
+      margin-top: 30px;
+      font-size: 13px;
+      text-align: center;
+      color: #555;
+    }
+    .license a {
+      color: #0078d7;
+      text-decoration: none;
+    }
+    .license a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Barcode & QRCode Generator (MIT License)</h2>
+    <div class="form-group">
+      <label for="inputText">Masukkan Teks / URL:</label>
+      <input type="text" id="inputText" placeholder="Contoh: 123456789 atau https://example.com">
+    </div>
+    <div class="form-group">
+      <label for="errorLevel">Pilih Level Koreksi Error QRCode:</label>
+      <select id="errorLevel">
+        <option value="L">L (Low - 7%)</option>
+        <option value="M">M (Medium - 15%)</option>
+        <option value="Q">Q (Quartile - 25%)</option>
+        <option value="H">H (High - 30%)</option>
+      </select>
+    </div>
+
+    <div class="output">
+      <h3>Barcode128</h3>
+      <svg id="barcode"></svg>
+      <div class="actions">
+        <button onclick="downloadBarcode()">Download Barcode</button>
+        <button onclick="copyBarcode()">Copy Barcode</button>
+      </div>
+
+      <h3>QRCode</h3>
+      <div id="qrcode"></div>
+      <div class="actions">
+        <button onclick="downloadQR()">Download QRCode</button>
+        <button onclick="copyQR()">Copy QRCode</button>
+      </div>
+    </div>
+
+    <div class="license">
+      <p>Library yang digunakan:</p>
+      <p>
+        <a href="https://github.com/lindell/JsBarcode/blob/master/LICENSE" target="_blank">JsBarcode - MIT License</a><br>
+        <a href="https://github.com/kazuhikoarase/qrcode-generator" target="_blank">qrcode-generator - MIT License</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const inputField = document.getElementById("inputText");
+    const errorLevelSelect = document.getElementById("errorLevel");
+
+    function generate() {
+      const text = inputField.value.trim();
+      const level = errorLevelSelect.value;
+
+      if (!text) {
+        document.getElementById("barcode").innerHTML = "";
+        document.getElementById("qrcode").innerHTML = "";
+        return;
+      }
+
+      // Generate Barcode128
+      JsBarcode("#barcode", text, {
+        format: "CODE128",
+        lineColor: "#000",
+        width: 2,
+        height: 80,
+        displayValue: true
+      });
+
+      // Generate QRCode dengan qrcode-generator (MIT)
+      const qr = qrcode(0, level); // 0 = auto type number
+      qr.addData(text);
+      qr.make();
+      document.getElementById("qrcode").innerHTML = qr.createImgTag(11, 5); 
+      // 6 = ukuran modul, 10 = margin piksel
+    }
+
+    // Event listener real-time
+    inputField.addEventListener("input", generate);
+    errorLevelSelect.addEventListener("change", generate);
+
+    // Download Barcode (SVG → PNG dengan margin)
+    function downloadBarcode() {
+      const svg = document.getElementById("barcode");
+      const svgData = new XMLSerializer().serializeToString(svg);
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const img = new Image();
+      img.onload = function() {
+        const margin = 10;
+        canvas.width = img.width + margin * 2;
+        canvas.height = img.height + margin * 2;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, margin, margin);
+        const a = document.createElement("a");
+        a.href = canvas.toDataURL("image/png");
+        a.download = "barcode.png";
+        a.click();
+      };
+      img.src = "data:image/svg+xml;base64," + btoa(svgData);
+    }
+
+    // Copy Barcode ke clipboard (tanpa margin)
+    async function copyBarcode() {
+  const svg = document.getElementById("barcode");
+  const svgData = new XMLSerializer().serializeToString(svg);
+
+  // Buat canvas untuk render PNG
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  const img = new Image();
+  img.onload = async function() {
+    // Tentukan resolusi tinggi (misalnya 1000px lebar)
+    const scale = 4; // faktor pembesaran
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+
+    // Convert ke blob PNG
+    canvas.toBlob(async function(blob) {
+      try {
+        const item = new ClipboardItem({ "image/png": blob });
+        await navigator.clipboard.write([item]);
+        alert("Barcode berhasil dicopy ke clipboard!");
+      } catch (err) {
+        console.error("Clipboard error:", err);
+        alert("Gagal copy ke clipboard. Pastikan browser mendukung dan jalankan di HTTPS.");
+      }
+    });
+  };
+  img.src = "data:image/svg+xml;base64," + btoa(svgData);
+}
+
+    // Download QRCode dengan margin
+    function downloadQR() {
+      const img = document.querySelector("#qrcode img");
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const margin = 10;
+      const qrImg = new Image();
+      qrImg.crossOrigin = "anonymous";
+      qrImg.onload = function() {
+        canvas.width = qrImg.width + margin * 2;
+        canvas.height = qrImg.height + margin * 2;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(qrImg, margin, margin);
+        const a = document.createElement("a");
+        a.href = canvas.toDataURL("image/png");
+        a.download = "qrcode.png";
+        a.click();
+      };
+      qrImg.src = img.src;
+    }
+
+    // Copy QRCode ke clipboard (tanpa margin)
+    async function copyQR() {
+      const img = document.querySelector("#qrcode img");
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const qrImg = new Image();
+      qrImg.crossOrigin = "anonymous";
+      qrImg.onload = async function() {
+        canvas.width = qrImg.width;
+        canvas.height = qrImg.height;
+        ctx.drawImage(qrImg, 0, 0);
+        canvas.toBlob(async function(blob) {
+          const item = new ClipboardItem({"image/png": blob});
+          await navigator.clipboard.write([item]);
+          alert("QRCode berhasil dicopy ke clipboard!");
+        });
+      };
+      qrImg.src = img.src;
+    }
+  </script>
+</body>
+</html>
