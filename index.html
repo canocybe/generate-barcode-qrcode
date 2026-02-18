@@ -19,19 +19,19 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      max-width: 600px;
+      max-width: 800px;
       margin: 0 auto;
     }
     textarea {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       font-size: 14px;
       border: 1px solid #ccc;
       border-radius: 6px;
       resize: vertical;
     }
     select, button {
-      padding: 10px;
+      padding: 12px;
       font-size: 14px;
       border: 1px solid #ccc;
       border-radius: 6px;
@@ -60,7 +60,8 @@
       padding: 10px;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      width: 220px; /* konsisten */
+      width: 220px;
+      flex: 1 1 220px;
     }
     .qr-item svg {
       width: 200px;
@@ -83,7 +84,40 @@
       gap: 10px;
       margin-top: 10px;
     }
-    @media (max-width: 600px) {
+
+    /* Responsif */
+    @media (max-width: 1024px) {
+      .controls {
+        max-width: 90%;
+      }
+      .qr-item {
+        width: 180px;
+      }
+      .qr-item svg {
+        width: 160px;
+        height: 160px;
+      }
+    }
+    @media (max-width: 768px) {
+      textarea {
+        font-size: 13px;
+      }
+      button, select {
+        font-size: 13px;
+        padding: 10px;
+      }
+      .qr-item {
+        width: 150px;
+      }
+      .qr-item svg {
+        width: 130px;
+        height: 130px;
+      }
+    }
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
       textarea {
         font-size: 12px;
       }
@@ -92,11 +126,11 @@
         padding: 8px;
       }
       .qr-item {
-        width: 160px;
+        width: 120px;
       }
       .qr-item svg {
-        width: 140px;
-        height: 140px;
+        width: 100px;
+        height: 100px;
       }
     }
   </style>
@@ -147,11 +181,11 @@
           const label = document.createElement('p');
           label.textContent = `Baris ${index + 1}: ${line}`;
 
-          const qr = qrcode(0, 'L'); // typeNumber=0 (auto), error correction L (7%)
+          const qr = qrcode(0, 'L');
           qr.addData(line);
           qr.make();
           const qrDiv = document.createElement('div');
-          qrDiv.innerHTML = qr.createSvgTag({cellSize: 4, margin: 2}); // konsisten ukuran
+          qrDiv.innerHTML = qr.createSvgTag({cellSize: 4, margin: 2});
 
           wrapper.appendChild(label);
           wrapper.appendChild(qrDiv);
@@ -169,7 +203,7 @@
           qr.addData(line);
           qr.make();
           const qrDiv = document.createElement('div');
-          qrDiv.innerHTML = qr.createSvgTag({cellSize: 4, margin: 2}); // sama ukuran
+          qrDiv.innerHTML = qr.createSvgTag({cellSize: 4, margin: 2});
 
           wrapper.appendChild(label);
           wrapper.appendChild(qrDiv);
@@ -214,4 +248,4 @@
     });
   </script>
 </body>
-  </html>
+</html>
