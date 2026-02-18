@@ -2,7 +2,6 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Multi QR Code Generator (qrcode-generator)</title>
   <style>
     body {
@@ -146,7 +145,7 @@
       <option value="slide">Slide</option>
     </select>
     <button id="generateBtn">Generate QR Codes</button>
-    <small>Tips: Tekan <b>Shift+Enter</b> untuk langsung generate.</small>
+    <small>Tips: Tekan <b>Ctrl+Enter</b> untuk langsung generate.</small>
   </div>
 
   <div id="output"></div>
@@ -226,9 +225,9 @@
 
     document.getElementById('generateBtn').addEventListener('click', generateQRCodes);
 
-    // Shift+Enter untuk generate
+    // Ctrl+Enter untuk generate
     document.getElementById('inputText').addEventListener('keydown', function(event) {
-      if (event.key === 'Enter' && event.shiftKey) {
+      if (event.key === 'Enter' && event.ctrlKey) {
         event.preventDefault();
         generateQRCodes();
       }
@@ -250,4 +249,3 @@
   </script>
 </body>
 </html>
-
